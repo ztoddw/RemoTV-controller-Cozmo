@@ -262,7 +262,7 @@ def startVideoCapture():
        videoCommandLine += (' -r {framerate} {in_options} -i {video_device} {video_filter}'
                         ' -f mpegts -codec:v {video_codec} -b:v {video_bitrate}k -bf 0'
                         ' -muxdelay 0.001 {out_options}'
-                        ' -headers \'Authorization: Bearer {robotKey}\''
+                        ' -headers "Authorization: Bearer {robotKey}"'
                         ' http://{server}/transmit?name={channel}-video')
                         
        videoCommandLine = videoCommandLine.format(ffmpeg=ffmpeg_location,
@@ -311,7 +311,7 @@ def startAudioCapture():
     audioCommandLine += (' {in_options} -i {audio_device} -f mpegts'
                          ' -codec:a {audio_codec}  -b:a {audio_bitrate}k'
                          ' -muxdelay 0.001 {out_options}'
-                         ' -headers \'Authorization: Bearer {robotKey}\''
+                         ' -headers "Authorization: Bearer {robotKey}"'
                          ' http://{server}/transmit?name={channel}-audio')
 
     audioCommandLine = audioCommandLine.format(ffmpeg=ffmpeg_location,
