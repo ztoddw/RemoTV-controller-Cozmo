@@ -3,7 +3,7 @@
 This controller software is designed to run on your robot and will connect with our development server. It's tuned to support Raspberry Pi based robots, however there is extensive support for other hardware configurations.
 
 ## Basic setup
-If this is your first time working with a Raspberry Pi or Linux, we recommend following our [initializtion tutorial](https://github.com/remotv/controller/wiki/Initializing-the-Raspberry-Pi) to get started.
+If this is your first time working with a Raspberry Pi or Linux, we recommend following our [initialization tutorial](https://github.com/remotv/controller/wiki/Initializing-the-Raspberry-Pi) to get started.
 
 ## Installing remotv control scripts on a Raspberry Pi
 
