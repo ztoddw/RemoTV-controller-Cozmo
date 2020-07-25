@@ -39,6 +39,14 @@ ARM = 1
 def setup(robot_config):
     global megapiBot
     megapiBot = MegapiBot(robot_config)
+    motorTime = robot_config.getfloat('megapi_board', 'motor_time')
+    drivingSpeed = robot_config.getint('megapi_board', 'driving_speed')
+    armSpeed = robot_config.getint('megapi_board', 'arm_speed')
+    grabberSpeed = robot_config.getint('megapi_board', 'grabber_speed')
+    LEFT_TRACK = robot_config.getint('megapi_board', 'left_track_port')
+    RIGHT_TRACK = robot_config.getint('megapi_board', 'right_track_port')
+    GRABBER = robot_config.getint('megapi_board', 'grabber_port')
+    ARM = robot_config.getint('megapi_board', 'arm_port')
 
 def move(args):
     try:
