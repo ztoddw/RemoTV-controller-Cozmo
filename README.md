@@ -74,6 +74,7 @@ The RasPi will need the following things install so it can talk to your motors a
      - `serial_board`
      - `telly`
      - `thunderborg`
+     - `megapi_board`
    - Configure your hardwares section. Each hardware type can have their own section it the controller. Look through the file for a section named the same as your hardware controller. If the section exists, read through it and adjust the variable as required.
 
 3. Configure the `[camera]` section
@@ -179,6 +180,7 @@ The following hardware is supported.
 - PiBorg ThunderBorg Motor Driver
 - Pololu Dual MC33926 Motor Driver (experimental)
 - Pololu DRV8835 Dual Motor Driver
+- MegaPi by Makeblock
 
 Missing something? You can add it, open source! Instructions for adding new hardware can be found [here.](https://github.com/remotv/controller/wiki/Extending-Controller)
 
