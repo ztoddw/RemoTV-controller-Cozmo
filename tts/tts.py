@@ -13,6 +13,7 @@ if (sys.version_info > (3, 0)):
 
 type = 'none'
 tts_module = None
+tts_volume = 50
 mute = False
 mute_anon = None
 delay_tts = False
@@ -32,6 +33,7 @@ def setup(robot_config):
     global hw_num
     global delay_tts
     global delay
+    global tts_volume
     
     type = robot_config.get('tts', 'type')
     mute_anon = not robot_config.getboolean('tts', 'anon_tts')
@@ -40,6 +42,9 @@ def setup(robot_config):
     if robot_config.has_option('tts', 'delay_tts') and robot_config.has_option('tts', 'delay'):
         delay_tts = robot_config.getboolean('tts', 'delay_tts')
         delay = robot_config.getint('tts', 'delay')
+
+    if robot_config.has_option('tts', 'tts_volume'):
+        tts_volume = robot_config.getint('tts', 'tts_volume')
 
 # TODO: Delay TTS may not currently be via, and messenger no longer exist
 #       and sending messages to chat cannot currently be disabled.
@@ -57,6 +62,7 @@ def setup(robot_config):
 
     # convert the device to hw num if not on windows
     if platform.system() != "Windows":
+        volume(tts_volume)
         if audio_device != '':
             temp_hw_num = audio_util.getSpeakerByName(audio_device.encode('utf-8'))
             if temp_hw_num != None:
@@ -91,7 +97,7 @@ def setup(robot_config):
             tts_module = importlib.import_module('tts.'+type)
         else:
             tts_module = __import__("tts."+type, fromlist=[type])    
-        
+
     #call the tts handlers setup function
     tts_module.setup(robot_config)
 
