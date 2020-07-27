@@ -62,7 +62,6 @@ def setup(robot_config):
 
     # convert the device to hw num if not on windows
     if platform.system() != "Windows":
-        volume(tts_volume)
         if audio_device != '':
             temp_hw_num = audio_util.getSpeakerByName(audio_device.encode('utf-8'))
             if temp_hw_num != None:
@@ -71,6 +70,7 @@ def setup(robot_config):
                 else:
                     log.warn("controller.conf is out of date. Consider updating.")
                     robot_config.set('tts', 'hw_num', str(temp_hw_num))
+        volume(tts_volume)
     
     if robot_config.has_option('tts', 'speaker_num'):
         hw_num = robot_config.get('tts', 'speaker_num')
