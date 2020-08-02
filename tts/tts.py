@@ -70,14 +70,16 @@ def setup(robot_config):
                 else:
                     log.warn("controller.conf is out of date. Consider updating.")
                     robot_config.set('tts', 'hw_num', str(temp_hw_num))
-        volume(tts_volume)
     
     if robot_config.has_option('tts', 'speaker_num'):
         hw_num = robot_config.get('tts', 'speaker_num')
     else:
         log.warn("controller.conf is out of date. Consider updating.")
         hw_num = robot_config.get('tts', 'hw_num')
-    
+
+    if platform.system() != "Windows":
+        volume(tts_volume)
+
     #import the appropriate tts handler module.
     log.debug("loading module tts/%s", type)
     if robot_config.getboolean('misc', 'custom_tts'):
