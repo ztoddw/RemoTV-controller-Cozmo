@@ -182,7 +182,7 @@ The following hardware is supported.
 - Pololu DRV8835 Dual Motor Driver
 - MegaPi by Makeblock
 
-Missing something? You can add it, open source! Instructions for adding new hardware can be found [here.](https://github.com/remotv/controller/wiki/Extending-Controller)
+Missing something? You can add it, open source! Instructions for adding new hardware can be found [here.](https://docs.remo.tv/en/stable/controller/hardware/extending.html)
 
 ## Chat Commands
 
