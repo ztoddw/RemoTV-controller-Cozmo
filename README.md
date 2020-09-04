@@ -1,13 +1,13 @@
 ## remo.tv is an open telerobotics platform designed for controling and sharing control of robots online in real time.
-## WARNING: This software is currently under development, so you may encounter frequent issues as updates are made. You can check out the [wiki](https://github.com/remotv/controller/wiki) for a more indepth view of what's currently supported.
+## WARNING: This software is currently under development, so you may encounter frequent issues as updates are made. You can check out the [wiki](https://docs.remo.tv) for a more indepth view of what's currently supported.
 This controller software is designed to run on your robot and will connect with our development server. It's tuned to support Raspberry Pi based robots, however there is extensive support for other hardware configurations.
 
 ## Basic setup
-If this is your first time working with a Raspberry Pi or Linux, we recommend following our [initialization tutorial](https://github.com/remotv/controller/wiki/Initializing-the-Raspberry-Pi) to get started.
+If this is your first time working with a Raspberry Pi or Linux, we recommend following our [initialization tutorial](https://docs.remo.tv/en/stable/controller/getting_started.html) to get started.
 
 ## Installing remotv control scripts on a Raspberry Pi
 
-If doing things manually isn't your style, we made an [optional guided installation](https://github.com/remotv/controller/wiki/Optional-Guided-Installation-Script) script that handles mostly everything for you.
+If doing things manually isn't your style, we made an [optional guided installation](https://docs.remo.tv/en/stable/controller/guided_installation.html) script that handles mostly everything for you.
 
 The RasPi will need the following things install so it can talk to your motors and talk to the internet. Make sure you don’t get any errors in the console when doing the step below. If you have an issue, you can run this line again, and that will usually fix it!
 
@@ -244,7 +244,7 @@ Install [DRV8835 Motor Driver library](https://github.com/pololu/drv8835-motor-d
 
 Install [MC33926 Motor Driver library](https://github.com/pololu/dual-mc33926-motor-driver-rpi)
 
-# Check out the [Wiki](https://github.com/remotv/controller/wiki) for more information
+# Check out the [Wiki](https://docs.remo.tv) for more information
 
 # A note about the Raspi Cam Module
 
