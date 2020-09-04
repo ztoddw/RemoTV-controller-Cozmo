@@ -208,8 +208,8 @@ Hardware modules can have their own hardware specific TTS commands.
 
 ## Cozmo
 
-For Anki Cozmo on Mac or Linux, please see the intructions [here](documentation/COZMO_MAC.md).
-For Windows instructions, please see the instructions [here](documentation/COZMO_WIN.md).
+For Anki Cozmo on Mac or Linux, please see the intructions [here](https://docs.remo.tv/en/stable/controller/hardware/cozmo.html).
+For Windows instructions, please see the instructions [here](https://docs.remo.tv/en/stable/controller/hardware/cozmo-win.html).
 
 ## GoPiGo3
 
