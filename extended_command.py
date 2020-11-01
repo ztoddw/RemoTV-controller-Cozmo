@@ -17,7 +17,7 @@ log = logging.getLogger('RemoTV.extended_command')
 # /unmod username
 # /stop username
 # /unstop username
-# /tts volume (int)
+# /tts vol (int)
 # /mic mute
 # /mic unmute
 # /xcontrol username
