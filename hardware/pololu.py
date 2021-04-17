@@ -1,4 +1,5 @@
 import logging
+import time
 log = logging.getLogger('RemoTV.hardware.pololu')
 
 try:
@@ -15,23 +16,23 @@ drivingSpeed = 0
 
 def setup(robot_config):
     global drivingSpeed
-    drivingSpeed = robot_config.getint('pololu', 'driving_speed')
-    
+    drivingSpeed = robot_config.getint('pololu', 'drivingSpeed')
+
 def move(args):
-    command = args['button']['command']
+    direction = args['button']['command']
     if direction == 'f':
-	      motors.setSpeeds(drivingSpeed, drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+        motors.setSpeeds(drivingSpeed, drivingSpeed)
+        time.sleep(0.3)
+        motors.setSpeeds(0, 0)
     if direction == 'b':
-	      motors.setSpeeds(-drivingSpeed, -drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+        motors.setSpeeds(-drivingSpeed, -drivingSpeed)
+        time.sleep(0.3)
+        motors.setSpeeds(0, 0)
     if direction == 'l':
-	      motors.setSpeeds(-drivingSpeed, drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+        motors.setSpeeds(-drivingSpeed, drivingSpeed)
+        time.sleep(0.3)
+        motors.setSpeeds(0, 0)
     if direction == 'r':
-	      motors.setSpeeds(drivingSpeed, -drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+        motors.setSpeeds(drivingSpeed, -drivingSpeed)
+        time.sleep(0.3)
+        motors.setSpeeds(0, 0)
