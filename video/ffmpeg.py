@@ -3,30 +3,31 @@
 from video.ffmpeg_process import *
 
 import audio_util
-import networking
-import watchdog
-import subprocess
-import shlex
-import schedule
-import extended_command
-import atexit
-import os
-import sys
-import logging
-import robot_util
-import time
-import signal
+import networking, watchdog, subprocess, shlex
+
+import schedule, extended_command
+import atexit, os, sys, logging
 
 log = logging.getLogger('RemoTV.video.ffmpeg')
+
+import robot_util, time, signal
 
 robotKey=None
 server=None
 no_mic=True
 no_camera=True
+print ('1:set mic_off=False')
 mic_off=False
 
-x_res = 640
-y_res = 480
+        # tw 3/10/23 using lists now. (4 video options in the config file now) initialize the lists:
+video_input_formats, video_input_options, video_output_options, video_devices, x_res_list, y_res_list = \
+    ([None] * 20, [None] * 20, [None] * 20, [None] * 20, [None] * 20, [None] * 20)
+
+#x_res_list[0], y_res_list[0] = (320, 240)
+#x_res_list[1], y_res_list[1] = (320, 240)
+#x_res_list[2], y_res_list[2] = (1280, 720)
+#x_res_list[3], y_res_list[3] = (1280, 720)
+
 
 ffmpeg_location = None
 v4l2_ctl_location = None
@@ -41,12 +42,11 @@ audio_sample_rate = None
 video_codec = None
 video_bitrate = None
 video_filter = ''
-video_device = None
+
 audio_input_format = None
 audio_input_options = None
 audio_output_options = None
-video_input_options = None
-video_output_options = None
+
 video_start_count = 0
 
 brightness=None
@@ -57,40 +57,20 @@ old_mic_vol = 50
 mic_vol = 50
 
 def setup(robot_config):
-    global robotKey
-    global no_mic
-    global no_camera
+    global robotKey, no_mic, mic_off, no_camera
+    global stream_key, server
+    global x_res_list, y_res_list, x_res, y_res
 
-    global stream_key
-    global server
+    global ffmpeg_location, v4l2_ctl_location
 
-    global x_res
-    global y_res
+    global audio_hw_num, audio_device, audio_codec, audio_channels, audio_bitrate
+    global audio_sample_rate, video_codec, video_bitrate, video_framerate, video_filter
+    global video_devices, audio_input_format, audio_input_options
+    
+    global audio_output_options, video_input_formats, \
+        video_input_options, video_output_options, chosen_video_option
 
-    global ffmpeg_location
-    global v4l2_ctl_location
-
-    global audio_hw_num
-    global audio_device
-    global audio_codec
-    global audio_channels
-    global audio_bitrate
-    global audio_sample_rate
-    global video_codec
-    global video_bitrate
-    global video_framerate
-    global video_filter
-    global video_device
-    global audio_input_format
-    global audio_input_options
-    global audio_output_options
-    global video_input_format
-    global video_input_options
-    global video_output_options
-
-    global brightness
-    global contrast
-    global saturation
+    global brightness, contrast, saturation
 
     robotKey = robot_config.get('robot', 'robot_key')
 
@@ -100,13 +80,11 @@ def setup(robot_config):
         server = robot_config.get('misc', 'server')
  
     no_mic = robot_config.getboolean('camera', 'no_mic')
+    mic_off = robot_config.getboolean('camera', 'mic_off')
     no_camera = robot_config.getboolean('camera', 'no_camera')
 
     ffmpeg_location = robot_config.get('ffmpeg', 'ffmpeg_location')
     v4l2_ctl_location = robot_config.get('ffmpeg', 'v4l2-ctl_location')
-
-    x_res = robot_config.getint('camera', 'x_res')
-    y_res = robot_config.getint('camera', 'y_res')
 
     if not no_camera:
         if robot_config.has_option('camera', 'brightness'):
@@ -115,15 +93,27 @@ def setup(robot_config):
             contrast = robot_config.get('camera', 'contrast')
         if robot_config.has_option('camera', 'saturation'):
             saturation = robot_config.get('camera', 'saturation')
-        
-        video_device = robot_config.get('camera', 'camera_device')
+       
         video_codec = robot_config.get('ffmpeg', 'video_codec')
         video_bitrate = robot_config.get('ffmpeg', 'video_bitrate')        
         if robot_config.has_option('ffmpeg', 'video_framerate'):
             video_framerate = robot_config.get('ffmpeg', 'video_framerate')
-        video_input_format = robot_config.get('ffmpeg', 'video_input_format')
-        video_input_options = robot_config.get('ffmpeg', 'video_input_options')
-        video_output_options = robot_config.get('ffmpeg', 'video_output_options')
+        
+        for i in range(20) :             #tw 3/14/23- added this- multiple (up to 20) video options in the config file now.
+            if robot_config.has_option('camera', 'camera_device{}'.format(i+1)) :
+                video_devices[i] = robot_config.get('camera', 'camera_device{}'.format(i+1))
+                video_input_formats[i] = robot_config.get('ffmpeg', 'video_input_format{}'.format(i+1))
+                video_input_options[i] = robot_config.get('ffmpeg', 'video_input_options{}'.format(i+1))
+                video_output_options[i] = robot_config.get('ffmpeg', 'video_output_options{}'.format(i+1))
+                x_res_list[i] = robot_config.getint('camera', 'x_res{}'.format(i+1))
+                y_res_list[i] = robot_config.getint('camera', 'y_res{}'.format(i+1))
+
+        chosen_video_option = int(robot_config.get('ffmpeg', 'StartingVideoOption')) - 1
+        print (chosen_video_option, x_res_list)
+        
+        x_res = x_res_list[chosen_video_option]
+        y_res = y_res_list[chosen_video_option]
+        print ("x_res, y_res = ", x_res, y_res)
 
         if robot_config.has_option('ffmpeg', 'video_filter'):
             video_filter = robot_config.get('ffmpeg', 'video_filter')
@@ -141,6 +131,7 @@ def setup(robot_config):
         else:
             log.warn("controller.conf is out of date. Consider updating.")
             audio_hw_num = robot_config.get('camera', 'audio_hw_num')
+        
         if robot_config.has_option('camera', 'mic_device'):
             audio_device = robot_config.get('camera', 'mic_device')
         else:
@@ -155,6 +146,7 @@ def setup(robot_config):
         audio_output_options = robot_config.get('ffmpeg', 'audio_output_options')
 
         if robot_config.getboolean('tts', 'ext_chat'):
+            print('Adding audio chat handler')
             extended_command.add_command('.audio', audioChatHandler)
             if audio_input_format == "alsa":
                 extended_command.add_command('.mic', micHandler)
@@ -170,25 +162,34 @@ def setup(robot_config):
         if audio_input_format == 'alsa':
             audio_device = 'hw:' + str(audio_hw_num)
 
-def start():
-    if not no_camera:
-        watchdog.start("FFmpegCameraProcess", startVideoCapture)
-        
-    if not no_mic:
-        if not mic_off:
-#        watchdog.start("FFmpegAudioProcess", startAudioCapture)
-            watchdog.start("FFmpegAudioProcess", startAudioCapture)
 
-# This starts the ffmpeg command string passed in command, and stores procces in the global
+def start():
+    global no_mic   #tw 3/3/23 added
+    global mic_off  #tw 3/3/23 added
+    
+    log.debug("start(): networking.internetStatus = %s", networking.internetStatus)
+    if not no_camera:
+        log.debug("start().2: networking.internetStatus = %s", networking.internetStatus)
+        watchdog.start("FFmpegCameraProcess", startVideoCapture)
+    
+        #tw 3/26/23- let's just not turn on audio at first until someone sends a command. (see cozmo.py)
+    #if not no_mic and not mic_off:
+    #    watchdog.start("FFmpegAudioProcess", startAudioCapture)
+
+
+# startFFMPEG starts the ffmpeg command string passed in command, and stores procces in the global
 # variable named after the string passed in process. It registers an atexit function pass in atExit
 # and uses the string passed in name as part of the error messages.
+
 def startFFMPEG(command, name, atExit, process):
     try:
         if sys.platform.startswith('linux') or sys.platform == "darwin":
             ffmpeg_process=subprocess.Popen(command, stderr=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
         else: 
             ffmpeg_process=subprocess.Popen(command, stderr=subprocess.PIPE, shell=True)
+        
         globals()[process] = ffmpeg_process
+        
     except OSError: # Can't find / execute ffmpeg
         log.critical("ERROR: Can't find / execute ffmpeg, check path in conf")
         robot_util.terminate_controller()
@@ -202,7 +203,6 @@ def startFFMPEG(command, name, atExit, process):
         atexit.register(atExit)
         ffmpeg_process.wait()
 
-
         if ffmpeg_process.returncode > 0:
             log.debug("ffmpeg exited abnormally with code {}".format(ffmpeg_process.returncode))
             error = ffmpeg_process.communicate()
@@ -214,8 +214,8 @@ def startFFMPEG(command, name, atExit, process):
         else:
             log.debug("ffmpeg exited normally with code {}".format(ffmpeg_process.returncode))
 
-
         atexit.unregister(atExit)
+
 
 def stopFFMPEG(ffmpeg_process):
     try:
@@ -227,9 +227,11 @@ def stopFFMPEG(ffmpeg_process):
     except OSError: # process is already terminated
         pass
 
+
 def startVideoCapture():
     global video_process
     global video_start_count
+    global x_res_list, y_res_list, chosen_video_option
 
     while not networking.authenticated:
         time.sleep(1)
@@ -252,11 +254,22 @@ def startVideoCapture():
     if (saturation is not None):
         v4l2SetCtrl("saturation", saturation)
 
+    log.debug("networking.internetStatus = %s", networking.internetStatus)
+    
     if networking.internetStatus:
     
-       videoCommandLine = '{ffmpeg} -f {input_format} -framerate {framerate}'
+            # tw 3/9/23: for my IP cam, I gotta take out -f and -framerate and -video_size.
+       videoCommandLine = '{ffmpeg}'
        
-       if video_input_format != "mjpeg":
+       chosenVideo = video_input_formats[chosen_video_option]
+       
+       if chosenVideo != "":
+           videoCommandLine += ' -f {input_format}'
+           
+       if chosenVideo not in ("", "lavfi") :
+           videoCommandLine += ' -framerate {framerate}'
+       
+       if chosenVideo not in ("lavfi","mjpeg",""):
            videoCommandLine += ' -video_size {xres}x{yres}'
 
        videoCommandLine += (' -r {framerate} {in_options} -i {video_device} {video_filter}'
@@ -266,38 +279,47 @@ def startVideoCapture():
                         ' http://{server}/transmit?name={channel}-video')
                         
        videoCommandLine = videoCommandLine.format(ffmpeg=ffmpeg_location,
-                            input_format=video_input_format,
+                            input_format=chosenVideo,
                             framerate=video_framerate,
-                            in_options=video_input_options,
-                            video_device=video_device, 
+                            in_options=video_input_options[chosen_video_option],
+                            video_device=video_devices[chosen_video_option], 
                             video_filter=video_filter,
                             video_codec=video_codec,
                             video_bitrate=video_bitrate,
-                            out_options=video_output_options,
+                            out_options=video_output_options[chosen_video_option],
                             server=server,
                             channel=networking.channel_id,
-                            xres=x_res, 
-                            yres=y_res,
+                            xres=x_res_list[chosen_video_option], 
+                            yres=y_res_list[chosen_video_option],
                             robotKey=robotKey)
 
-       log.debug("videoCommandLine : %s", videoCommandLine)
+       log.info("videoCommandLine : %s", videoCommandLine)
        startFFMPEG(videoCommandLine, 'Video',  atExitVideoCapture, 'video_process')
 
     else:
        log.debug("No Internet/Server : sleeping video start for 15 seconds")
        time.sleep(15)
 
+
 def atExitVideoCapture():
+    global video_process
     stopFFMPEG(video_process)
+    video_process = None
+
 
 def stopVideoCapture():
+    global video_process
     if video_process != None:
         watchdog.stop('FFmpegCameraProcess')
         stopFFMPEG(video_process)
+        video_process = None
+
  
 def restartVideoCapture(): 
     stopVideoCapture()
+    log.debug("restartVideoCapture: networking.internetStatus = %s", networking.internetStatus)
     watchdog.start("FFmpegCameraProcess", startVideoCapture)
+
 
 def startAudioCapture():
     global audio_process
@@ -327,35 +349,60 @@ def startAudioCapture():
                             channel=networking.channel_id,
                             robotKey=robotKey)
                             
-    log.debug("audioCommandLine : %s", audioCommandLine)
+    log.info("audioCommandLine : %s", audioCommandLine)
     startFFMPEG(audioCommandLine, 'Audio',  atExitAudioCapture, 'audio_process')
+
     
 def atExitAudioCapture():
+    global audio_process
     stopFFMPEG(audio_process)
+    audio_process = None
+
 
 def stopAudioCapture():
+    global audio_process
     if audio_process != None:
         watchdog.stop('FFmpegAudioProcess')
         stopFFMPEG(audio_process)
+        audio_process = None
+
 
 def restartAudioCapture():
+    global mic_off
     stopAudioCapture()
+    
     if not mic_off:
         watchdog.start("FFmpegAudioProcess", startAudioCapture)
 
+
 def videoChatHandler(command, args):
-    global video_process
-    global video_bitrate
+    global video_process, video_bitrate
+    global chosen_video_option, video_devices, x_res_list, y_res_list, \
+      video_input_formats, video_output_options, x_res, y_res
 
     if len(command) > 1:
-        if extended_command.is_authed(args['sender']) == 2: # Owner
+        if True:  #extended_command.is_authed(args['sender']) == 2: # Owner  #3/25/23 make available to all
+            if 'start' in command[1]:       #tw 3/4/23- added this - for start or restart
+                if len(command) > 2 and command[2].isdigit() :      #tw 3/10/23- added this
+                    chosen_video_option = int(command[2])
+                    x_res = x_res_list[chosen_video_option]
+                    y_res = y_res_list[chosen_video_option]
+
+                    
             if command[1] == 'start':
-                if not video_process.returncode == None:
+                print("in .video start)")
+                if video_process: print("video_process.returncode = " + str(video_process.returncode))
+                if not video_process or not video_process.returncode == None:
+                    log.debug("videoChatHandler: networking.internetStatus = %s", networking.internetStatus)
                     watchdog.start("FFmpegCameraProcess", startVideoCapture)
+                    
+
             elif command[1] == 'stop':
                 stopVideoCapture()
+                
             elif command[1] == 'restart':
                 restartVideoCapture()
+
             elif command[1] == 'bitrate':
                 if len(command) > 1:
                     if len(command) == 3:
@@ -366,8 +413,20 @@ def videoChatHandler(command, args):
                         except ValueError: # Catch someone passing not a number
                             pass
                     networking.sendChatMessage(".Video bitrate is %s" % video_bitrate)
+
+            elif command[1] == 'framerate':             # tw- 3/3/23 added framerate subcommand
+                if len(command) > 1:
+                    if len(command) == 3:
+                        try:
+                            int(command[2])
+                            video_framerate = command[2]
+                            restartVideoCapture()
+                        except ValueError: # Catch someone passing not a number
+                            pass
+                    networking.sendChatMessage(".Video framerate is %s" % video_framerate)
         else:
             networking.sendChatMessge("command only available to owner")
+
 
 def v4l2SetCtrl(control, level):
     command = "{v4l2_ctl} -d {device} -c {control}={level}".format(
@@ -392,6 +451,7 @@ def brightnessChatHandler(command, args):
                 brightness = new_brightness
                 v4l2SetCtrl("brightness", brightness)
 
+
 def contrastChatHandler(command, args):
     global contrast
     if len(command) > 1:
@@ -404,6 +464,7 @@ def contrastChatHandler(command, args):
                 contrast = new_contrast
                 v4l2SetCtrl("contrast", contrast)
 
+
 def saturationChatHandler(command, args):
     if len(command) > 2:
         if extended_command.is_authed(args['sender']): # Moderator
@@ -415,6 +476,7 @@ def saturationChatHandler(command, args):
                 saturation = new_saturation
                 v4l2SetCtrl("saturation", saturation)
 
+
 def audioChatHandler(command, args):
     global audio_process
     global audio_bitrate
@@ -423,15 +485,21 @@ def audioChatHandler(command, args):
     if len(command) > 1:
         if extended_command.is_authed(args['sender']) == 2: # Owner
             if command[1] == 'start':
-#                mic_off = False
-                if audio_process.returncode != None:
+                print ('3:set mic_off=False')
+                mic_off = False        # tw 2/24/23 re-enabled
+                print('in chat handler, starting audio')
+                if True: #audio_process.returncode != None:       # tw 3/3/23- took out conditional, not sure why here
                     watchdog.start("FFmpegAudioProcess", startAudioCapture)
             elif command[1] == 'stop':
+                print ('4:set mic_off=True')
+                mic_off = True         # tw 2/24/23 added
                 stopAudioCapture()
             elif command[1] == 'restart':
-#                mic_off = False
                 stopAudioCapture()
+                print ('5:set mic_off=False')
+                mic_off = False        # tw 2/24/23 re-enabled
                 watchdog.start("FFmpegAudioProcess", startAudioCapture)
+                
             elif command[1] == 'bitrate':
                 if len(command) > 1:
                     if len(command) == 3:
