@@ -1,3 +1,55 @@
+Updates on 4/8/23:
+
+For Windows pc, for a Cozmo robot. Main files (video/ffmpeg.py, controller.py, extended_commands.py, networking.py, robot_util.py) were modified, and untested with other robot types.
+
+Note: The Cozmo SDK works only with Python up to Python version 3.7.9.
+Your best option for video capture (or at least the best that worked for me) is using your pc's integrated webcam. Review the controller.conf file for different options that I tried. You might need to change or add video / audio settings in that file.
+
+After you get your remo.tv key and install the cozmo sdk (see instructions for cozmo for windows: http://cozmosdk.anki.com/docs/install-windows.html#install-windows), you might also need to install these:
+
+pip install socketIO-client configparser
+pip3 install --user cozmo[camera]
+pip3 install --user --upgrade cozmo
+ffmpeg
+
+You need a mobile phone to connect to your Cozmo, which phone needs to connect to your pc using one of these:
+Android Debug Bridge (if using android phone)
+ITunes (if using i-phone)
+
+I spent a while figuring out how to get to get the python code to connect to remo.tv without SSL errors- finally did these steps (along with code changes) to resolve them:
+
+1. Found the path for the certifs using this python code:
+import requests as r
+print(r.certs.where())
+
+In my case this was at:    C:\Users\user\AppData\Roaming\Python\Python37\site-packages\certifi\
+
+2. Added cert into for remo.tv (retrieved from browser lock symbol) to the cert file.
+
+
+Features I added with my code changes:
+
+1. Copy from the "Cozmo hotkeys.txt" file and paste into the JSON code box for the "Edit buttons" feature on your robot page. See description text in that file for what the hotkeys do- it should show up on your robot page also.
+
+2. I could not get the "type=cozmo_vid" option in the controller.conf file to work, so I used the ffmpeg option to use my laptop's integrated webcam as the main camera source, and captured cozmo's 1st person camera view to be shown as an overlay. (So run_video() is not used.) The controller.conf file allows multiple video options which can be selected using the ".video restart" command (See below) -- the "StartingVideoOption" option in controller.conf tells which option is selected to start with.  Review and change the camera_device options in controller.conf according to your own camera devices you will use.  Use "ffmpeg -sources" at a command line to view your audio and video sources connected to your pc.
+
+3. More extended chat commands: (in addition to those already documented)
+
+.video restart [1-n] :  restart your video using the video option # you give it.  It's zero-based for this command.  In the controller.conf file it's 1-based, so will be off by 1.
+
+.cam [on | off]  : turn on or off cozmo's 1st person camera view, as an overlay.
+
+.cam n  : Set delay between cozmo's 1st person camera captures. See note above. n is # of seconds- must be a positive # < 10.
+
+.cam snap  : turn full screen snapshot on.  You can use ".cam" to turn off. -- this is hard-coded to capture a snapshot from specific local lip address (as from an ip camera).  To use this, after setting up your camera to broadcast to a local ip, enter that ip in the cozVid function.
+
+.cam snap n  : turn full screen snapshot on, and set delay between snapshot captures. See note above. n is # of seconds- must be a positive # < 100.
+
+.cam [ul | um | ur | ml | mr | ll | lm | lr | fs] [big]  : Turn on cozmo's 1st person cam view as overlay in upper-left, upper-middle, upper-right, middle-left, middle-right, lower-left, lower-middle, lower-right, or full-screen. If "big" is included, the overlay is shown bigger.
+
+.a [1-9]  : execute a specific animation (after using "g" hotkey) with your Cozmo
+
+
 ## remo.tv is an open telerobotics platform designed for controling and sharing control of robots online in real time.
 ## WARNING: This software is currently under development, so you may encounter frequent issues as updates are made. You can check out the [wiki](https://docs.remo.tv) for a more indepth view of what's currently supported.
 This controller software is designed to run on your robot and will connect with our development server. It's tuned to support Raspberry Pi based robots, however there is extensive support for other hardware configurations.
