@@ -1,11 +1,11 @@
 Updates on 4/8/23:
 
-For Windows pc, for a Cozmo robot. Main files (video/ffmpeg.py, controller.py, extended_commands.py, networking.py, robot_util.py) were modified, and untested with other robot types.
+The main brach of this repo was programmed and tested out and is currently running most days to live stream to http://remo.tv in the RoboBobo channel.  It has only been tested and run on my own Windows pc laptop, for my Cozmo robot. Main files (video/ffmpeg.py, controller.py, extended_commands.py, networking.py, and robot_util.py), along with the hardware/cozmo.py file specific to a cozmo robot, were modified from the remo.tv repo this was forked from. This repo is untested with any other robot types.
 
 Note: The Cozmo SDK works only with Python up to Python version 3.7.9.
 Your best option for video capture (or at least the best that worked for me) is using your pc's integrated webcam. Review the controller.conf file for different options that I tried. You might need to change or add video / audio settings in that file.
 
-After you get your remo.tv key and install the cozmo sdk (see instructions for cozmo for windows: http://cozmosdk.anki.com/docs/install-windows.html#install-windows), you might also need to install these:
+After you get your remo.tv key and install the cozmo sdk (see instructions for cozmo sdk for windows: http://cozmosdk.anki.com/docs/install-windows.html#install-windows), you might also need to install these (also see https://docs.remo.tv/en/stable/controller/hardware/cozmo-win.html):
 
 * pip install socketIO-client configparser
 * pip3 install --user cozmo[camera]
