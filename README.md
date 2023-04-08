@@ -7,10 +7,10 @@ Your best option for video capture (or at least the best that worked for me) is 
 
 After you get your remo.tv key and install the cozmo sdk (see instructions for cozmo for windows: http://cozmosdk.anki.com/docs/install-windows.html#install-windows), you might also need to install these:
 
-pip install socketIO-client configparser
-pip3 install --user cozmo[camera]
-pip3 install --user --upgrade cozmo
-ffmpeg
+* pip install socketIO-client configparser
+* pip3 install --user cozmo[camera]
+* pip3 install --user --upgrade cozmo
+* ffmpeg
 
 You need a mobile phone to connect to your Cozmo, which phone needs to connect to your pc using one of these:
 Android Debug Bridge (if using android phone)
@@ -49,6 +49,9 @@ Features I added with my code changes:
 
 .a [1-9]  : execute a specific animation (after using "g" hotkey) with your Cozmo
 
+= = = = = = = = = = = = 
+
+Original documentation :
 
 ## remo.tv is an open telerobotics platform designed for controling and sharing control of robots online in real time.
 ## WARNING: This software is currently under development, so you may encounter frequent issues as updates are made. You can check out the [wiki](https://docs.remo.tv) for a more indepth view of what's currently supported.
