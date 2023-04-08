@@ -105,10 +105,11 @@ def write(self, config_file):
         log.error("ERROR: {} keys in file, {} in object".format(keys, keys_in))
 
     # delete the existing config backup
-    if os.path.exists(config_file + '.bak'):
-        os.remove(config_file + '.bak')
+    #if os.path.exists(config_file + '.bak'):   #tw 3/8/23- nah, keep allvbackups- will add date/time stamp
+    #    os.remove(config_file + '.bak')
 
-    os.rename(config_file, config_file+'.bak')
+        #tw 3/8/23- added date/time stamp
+    os.rename(config_file, config_file+'_replaced_' + time.strftime('%Y-%m-%d_%H%M%S') + '.bak')
 
     # write out the updated config file
     f = open(config_file, 'w')
@@ -124,12 +125,13 @@ chat_module = None
 move_handler = None
 
 # pass the lock to robot_util so the controller can be terminated from outside.
-terminate = thread.allocate_lock()
-robot_util.terminate = terminate
+terminateLock = thread.allocate_lock()
+robot_util.terminateLock = terminateLock
 
 # Enable logging, based upon the settings in the conf file.
 log = logging.getLogger('RemoTV')
 log.setLevel(logging.DEBUG)
+
 console_handler=logging.StreamHandler()
 console_handler.setLevel(logging.getLevelName(robot_config.get('logging', 'console_level')))
 console_formatter=logging.Formatter('%(asctime)s - %(filename)s : %(message)s','%H:%M:%S')
@@ -258,12 +260,16 @@ def handle_chat_message(args):
         extended_command.handler(args)
             
     message = args["message"]
+    
+    if message == ".audio start":   #tw 3/4/23- added this
+        module.lastCommandTime = time.time()
 
     try:
         if not message[0] == ".":
             tts.say(args)
     except IndexError:
         exit()
+        
         
 def handle_command(args):
         global handlingCommand
@@ -287,15 +293,17 @@ def on_handle_command(*args):
    else:
        thread.start_new_thread(handle_command, args)
 
+
 def on_handle_chat_message(*args):
    if chat_module == None:
        thread.start_new_thread(handle_chat_message, args)
    else:
        thread.start_new_thread(chat_module.handle_chat, args)
+
    
 def restart_controller(command, args):
     if extended_command.is_authed(args['sender']) == 2: # Owner
-        terminate.acquire()
+        terminateLock.acquire()
 
                     
 # TODO : This really doesn't belong here, should probably be in start script.
@@ -364,8 +372,12 @@ else:
 
 # Setup the video encoding
 video_module.setup(robot_config)
-if not test_mode:
+if True:  #not test_mode:       # tw 2/18/23 I still wanna do this in my testing
    video_module.start()
+
+    # tw 2/25/23 Pass the video module to the robot module in case it wants to stop/start video or audio
+module.video_module = video_module  
+print ('set module.video_module.')
 
 #load the extended chat commands
 if ext_chat:
@@ -389,13 +401,15 @@ if commandArgs.custom_chat:
        log.warning("Unable to find chat_custom.py")
     
 atexit.register(log.debug, "Attempting to clean up and exit nicely")
-if not test_mode:
+
+if True:     # not test_mode:        #2/18/23 tw- I still wanna keep it alive in test mode
     log.critical('RemoTV Controller Started')
-    while not terminate.locked():
+    while not terminateLock.locked():
         time.sleep(1)
         watchdog.watch()
 
     log.critical('RemoTV Controller Exiting')
 else:
     log.critical('RemoTV Controller Test Complete')
-sys.exit()
+
+#sys.exit()     #tw 3/8/23- if i take this out, will it be restarted after ".restart" is used? Nope.

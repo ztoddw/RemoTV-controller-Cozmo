@@ -68,8 +68,8 @@ def onHandleWebSocketClose(ws):
     authenticated = False
     log.info("websocket disconnect")
 
-def onHandleWebSocketError(ws, error):
-    log.error("WebSocket ERROR: {}".format(error))
+def onHandleWebSocketError(ws, error):      #tw 3/10/23- it shows error: 'd' every 15 seconds or so. dunno why.
+    if error != 'd': log.error("WebSocket ERROR: {}".format(error))
 
 def handleConnectChatChannel(host):
     global channel_id
@@ -176,7 +176,11 @@ def sendChatMessage(message):
 def isInternetConnected():
     try:
         url = 'https://{}'.format(server)
-        urllib2.urlopen(url, timeout=1)
+
+        import requests as r        # 2/19/23 tw- try this- it WORKED!
+        ca_f = r.certs.where()
+        urllib2.urlopen(url, timeout=1, cafile=ca_f)   # 2/19/23 tw- added cafile parameter
+
         log.debug("Server Detected")
         return True
     except urllib2.URLError as err:
@@ -196,6 +200,6 @@ def internetStatus_task():
             tts.say(bootMessage)
             log.info("internet connected")
         else:
-            log.info("missing internet connection")
-            tts.say("missing internet connection")
+            log.info("missing internet connection?")    #tw 2/12/23 not really
+            #tts.say("missing internet connection")
     lastInternetStatus = internetStatus

@@ -1,0 +1,60 @@
+[
+  {
+    "break": "line",
+    "label": "movement"
+  },
+  {
+    "label": "forward",
+    "command": "f",
+    "hot_key": "w"
+  },
+  {
+    "break": "line",
+    "label": ""
+  },
+  {
+    "label": "left",
+    "command": "l",
+    "hot_key": "a"
+  },
+  {
+    "label": "back",
+    "command": "b",
+    "hot_key": "s"
+  },
+  {
+    "label": "right",
+    "command": "r",
+    "hot_key": "d"
+  },
+  {
+    "break": "line",
+    "label": ""
+  },
+  {
+    "label": "example admin command",
+    "access": "owner",
+    "command": "example"
+  },
+  {
+    "label": "example timer",
+    "command": "timer-example",
+    "cooldown": 100
+  },
+  {
+    "label": "example timer",
+    "command": "timer-example",
+    "disabled": true
+  }
+]
+
+
+
+  {
+    "label": "Light Cubes",
+    "command": "lightcubes"
+  },
+  {
+    "label": "Dim Cubes",
+    "command": "dimcubes"
+  },
