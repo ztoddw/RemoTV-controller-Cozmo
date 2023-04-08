@@ -13,16 +13,17 @@ After you get your remo.tv key and install the cozmo sdk (see instructions for c
 * ffmpeg
 
 You need a mobile phone to connect to your Cozmo, which phone needs to connect to your pc using one of these:
-Android Debug Bridge (if using android phone)
-ITunes (if using i-phone)
+* Android Debug Bridge (if using android phone)
+* ITunes (if using i-phone)
 
 I spent a while figuring out how to get to get the python code to connect to remo.tv without SSL errors- finally did these steps (along with code changes) to resolve them:
 
 1. Found the path for the certifs using this python code:
-import requests as r
-print(r.certs.where())
-
-In my case this was at:    C:\Users\user\AppData\Roaming\Python\Python37\site-packages\certifi\
+```
+   import requests as r
+   print(r.certs.where())
+```
+   In my case this was at:    C:\Users\user\AppData\Roaming\Python\Python37\site-packages\certifi\
 
 2. Added cert into for remo.tv (retrieved from browser lock symbol) to the cert file.
 
@@ -35,15 +36,15 @@ Features I added with my code changes:
 
 3. More extended chat commands: (in addition to those already documented)
 
-.video restart [1-n] :  restart your video using the video option # you give it.  It's zero-based for this command.  In the controller.conf file it's 1-based, so will be off by 1.
+.video restart [1-n] :  restart your video using the video option # you give it.  It's zero-based for this command.  In the controller.conf file it's 1-based, so will be off by 1, compared to the '.video restart' command.
 
 .cam [on | off]  : turn on or off cozmo's 1st person camera view, as an overlay.
 
-.cam n  : Set delay between cozmo's 1st person camera captures. See note above. n is # of seconds- must be a positive # < 10.
+.cam n  : Set delay between cozmo's 1st person camera captures. See note above. n is # of seconds- must be a positive # < 10. Initial value is 0.5.
 
 .cam snap  : turn full screen snapshot on.  You can use ".cam" to turn off. -- this is hard-coded to capture a snapshot from specific local lip address (as from an ip camera).  To use this, after setting up your camera to broadcast to a local ip, enter that ip in the cozVid function.
 
-.cam snap n  : turn full screen snapshot on, and set delay between snapshot captures. See note above. n is # of seconds- must be a positive # < 100.
+.cam snap n  : turn full screen snapshot on, and set delay between snapshot captures. See note above. n is # of seconds- must be a positive # < 100. Initial value is 5.0.
 
 .cam [ul | um | ur | ml | mr | ll | lm | lr | fs] [big]  : Turn on cozmo's 1st person cam view as overlay in upper-left, upper-middle, upper-right, middle-left, middle-right, lower-left, lower-middle, lower-right, or full-screen. If "big" is included, the overlay is shown bigger.
 
