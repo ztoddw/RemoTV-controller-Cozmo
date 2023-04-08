@@ -91,8 +91,8 @@ def setup(config):
 # check if the user is the owner or moderator, 0 for not, 1 for moderator, 2 for owner
 
 
-def is_authed(user):
-    if user in owner:
+def is_authed(user):    # tw 3/26/23- made it avoid error when owner not initialized yet
+    if owner is not None and user in owner:
         return(2)
     elif user in mods:
         return(1)
@@ -266,6 +266,7 @@ def devmode_handler(command, args):
                     "Local Dev mode with mod controls enabled")
                 dev_mode = True
                 dev_mode_mods = True
+    
     log.debug("dev_mode : %s", str(dev_mode))
     log.debug("dev_mode_mods : %s", str(dev_mode_mods))
 
@@ -332,6 +333,7 @@ def save_handler(command, args):
         robot_config.write('controller.conf')
         robot_util.sendChatMessage('.Config file saved.')
 
+
 # This is a dictionary of commands and their handler functions
 commands = {'.ban'         :   {'func': ban_handler, 'perm': 2},
             '.unban'       :   {'func': unban_handler, 'perm': 2},
@@ -364,9 +366,9 @@ def handler(args):
         if command[0] in commands:
             commands[command[0]]['func'](command, args)
 
+
 # This function checks the user sending the command, and if authorized
 # call the move handler.
-
 
 def move_auth(args):
     user = args['user']['username']
